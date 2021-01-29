@@ -1,5 +1,5 @@
 # MCLIP-M
-**High-Level Summary :** A simple but adequately featured and secured password manager for the command-line interfaces of ANY Operating System. 
+**High-Level Summary :** A simple (~200 lines of code) but adequately featured and secured password manager for the command-line interfaces of ANY Operating System. 
 
 **Detailed Description -**
 
