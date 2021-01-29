@@ -18,3 +18,5 @@ Together with the script, MCLIP-M is **sufficiently secure and adequately featur
 MCLIP-M will be supported for some time and will be updated with new features.
 
 You may request new features at apjo@tuta.io or tip the developer with Monero at 8BYAyzAZzLsZj7P6o2Y9FHDrViHprwevS429Q7KBQ5VY4VKuRN1T1eWNzwC9s7hvyygMne2Vn8QTB32yLRfsHBLFKH8vf3a . 
+
+Note : How to install/use guides are part of the releases in PDF form.
