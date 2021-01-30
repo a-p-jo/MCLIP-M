@@ -18,15 +18,22 @@ MCLIP-M is a simple utility written 100% in C; It has **no dependencies as it us
 
 - "Precise" : Takes all input as command-line arguments at once. Fast, efficient , precise and meant for Terminal-savvy users who find point-and-click tedious and shallow.
 
-## Binary Release (Upcoming) Information :
-- **Windows :** x86 Executables for Windows 7 and higher ; MCLIP-M "Interactive" only (Takes no command-line arguments) + How-To ; MSVC-compiled on Windows 7, VS2019.
+## Binary Release Information (Coming Soon) :
+- **Windows :**
+Platform : x86 for Windows 7 and higher 
+Contents : MCLIP-M "Interactive" + How-To.pdf
+Compliation Details : MSVC-compiled on Windows 7, VS2019 (latest).
 
-- **macOS :** x86_64 Binaries ; MCLIP-M Interactive + MCLIP-M "Precise" (Takes command-line arguments) + Security.py + How-To ; Clang-compiled on macOS 11
+- **macOS :** 
+Platform : x86_64 modern macOS
+Contents : MCLIP-M Interactive + MCLIP-M Precise + Security.py + How-To.pdf 
+Compilation Details : Apple Clang 12 on macOS 11
 
-- **Linux :** x86_64 Static & Dynamic Binaries ; MCLIP-M Precise only + Security.py + How-To ; GCC-compiled on Ubuntu 20.04 
+- **Linux :** 
+Platform : x86_64 Static & Dynamic
+Contents : MCLIP-M Precise + Security.py + How-To
+Compilation Details : GCC 9.3 on Ubuntu 20.04
 
-Of course, any version of MCLIP-M can be compiled and used on any OS with a standard C compiler and a terminal in a matter of seconds. In fact, it is recommended that you self-compile it if possible, to ensure compatibility.
+Any version of MCLIP-M can be compiled and used on any OS with a standard C compiler and terminal in seconds. In fact, it is recommended that you self-compile it if possible, to ensure compatibility. 
 
-Accompanying this utility is a small Python script to help encrypt the text file storing passwords. It must be run in an interactive terminal window, as it will require user inputs.
-
-**Suggest features or report bugs to apjo@tuta.io or tip the developer (Monero) at 8BYAyzAZzLsZj7P6o2Y9FHDrViHprwevS429Q7KBQ5VY4VKuRN1T1eWNzwC9s7hvyygMne2Vn8QTB32yLRfsHBLFKH8vf3a**
+**Note :** The Python script must be run in an interactive terminal window, as it will require user inputs.
