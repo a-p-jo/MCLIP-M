@@ -13,7 +13,12 @@ MCLIP-M is a simple utility written 100% in C; It has **no dependencies as it us
 
 - **Simplicity :** No hundreds of command-line options, no worrisome dependencies,no confusing and application-specific binary database files. Easy to compile to any OS, all the features that are really necessary, data saved as easily viewable and editable text files and just ~200 lines of C code. Minimal, fast, portable, effective, and reliable. 
 
-## Binary Release Information :
+## Versions :
+- "Interactive" : Doesn't take command-line arguments; asks for inputs one-by-one. Ideal for those not savvy with a Terminal or paradigms where point-and-click is common.
+
+- "Precise" : Takes all input as command-line arguments at once. Fast, efficient , precise and meant for Terminal-savvy users who find point-and-click tedious and shallow.
+
+## Binary Release (Upcoming) Information :
 - **Windows :** x86 Executables for Windows 7 and higher ; MCLIP-M "Interactive" only (Takes no command-line arguments) + How-To ; MSVC-compiled on Windows 7, VS2019.
 
 - **macOS :** x86_64 Binaries ; MCLIP-M Interactive + MCLIP-M "Precise" (Takes command-line arguments) + Security.py + How-To ; Clang-compiled on macOS 11
