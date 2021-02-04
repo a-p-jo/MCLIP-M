@@ -51,7 +51,7 @@ int main()
 
             for (int i = 0; i < PSWD_LENGTH; i++)
             {
-                int holder = (rand() % (126 - 33 + 1)) + 33;
+                int holder = (rand() % (126 - 33 + 1)) + 33; /* Credits : https://stackoverflow.com/a/65931015/13651625 */
                 pswd[i] = holder;
             }
             pswd[PSWD_LENGTH] = '\0';
