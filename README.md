@@ -1,6 +1,6 @@
-# MCLIP-M : Minimalist Command Line Interface Password-Manager  
+# MCLIP-M v1.1 
 
-MCLIP-M is a simple utility written 100% in C; It has **no dependencies as it uses only the standard C library**. 
+MCLIP-M, Minimalist Command Line Interface Password-Manager, is a simple utility written 100% in C; It has **no dependencies as it uses only the standard C library**. 
 
 ## Features :
 - **Generation :** Generate pseudo-random passwords consisting of *all* characters. Default size is 32 characters, this can be customized easily.
@@ -13,27 +13,6 @@ MCLIP-M is a simple utility written 100% in C; It has **no dependencies as it us
 
 - **Simplicity :** No hundreds of command-line options, no worrisome dependencies,no confusing and application-specific binary database files. Easy to compile to any OS, all the features that are really necessary, data saved as easily viewable and editable text files and just ~200 lines of C code. Minimal, fast, portable, effective, and reliable. 
 
-## Versions :
-- "Interactive" : Doesn't take command-line arguments; asks for inputs one-by-one. Ideal for those not savvy with a Terminal or paradigms where point-and-click is common.
-
-- "Precise" : Takes all input as command-line arguments at once. Fast, efficient , precise and meant for Terminal-savvy users who find point-and-click tedious and shallow.
-
-## Binary Release Information (Coming Soon) :
-- **Windows :**
-Platform : x86 for Windows 7 and higher 
-Contents : MCLIP-M "Interactive" + How-To.pdf
-Compliation Details : MSVC-compiled on Windows 7, VS2019 (latest).
-
-- **macOS :** 
-Platform : x86_64 modern macOS
-Contents : MCLIP-M Interactive + MCLIP-M Precise + Security.py + How-To.pdf 
-Compilation Details : Apple Clang 12 on macOS 11
-
-- **Linux :** 
-Platform : x86_64 Static & Dynamic
-Contents : MCLIP-M Precise + Security.py + How-To
-Compilation Details : GCC 9.3 on Ubuntu 20.04
-
-Any version of MCLIP-M can be compiled and used on any OS with a standard C compiler and terminal in seconds. In fact, it is recommended that you self-compile it if possible, to ensure compatibility. 
-
-**Note :** The Python script must be run in an interactive terminal window, as it will require user inputs.
+**Notes :** 
+1. Any version of MCLIP-M can be compiled and used on any OS with a standard C compiler and terminal in seconds.
+2. The Python script must be run in an interactive terminal window, as it will require user inputs.
