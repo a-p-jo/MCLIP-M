@@ -216,6 +216,6 @@ char * time_str(void)
 
     if(time_now == NULL) return NULL; // ctime() may fail, in which case it returns NULL, so do the same.
 
-    time_now[25] = '\0'; // ctime() returns string of fixed size, fixed field-widths and formatting. 25th is newline '\n' 
+    rm_newline(time_now); // ctime() returns string of fixed size, fixed field-widths and formatting. 25th is newline '\n' 
     return time_now;
 }
