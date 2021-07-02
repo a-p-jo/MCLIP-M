@@ -180,7 +180,7 @@ int main(int argc, char **argv)
                                 {
                                         /* If unsaved, display password, error message and exit */
                                         puts(pswd);
-                                        fputs("Not enough arguments.\nFormat for \"g\" option with \"s\" argument :\n\tmclipm g(enerate) s(ave) [file] [comments (optional)]\n",stderr);
+                                        fputs("Not enough arguments.\nFormat for \"g\" option with \"s\" argument :\n\tmclipm g [s] [<file>] [comments]\n",stderr);
                                         exit(NOT_ENOUGH_ARGS);
                                 }
 
@@ -210,7 +210,7 @@ int main(int argc, char **argv)
                          */
                         if(argc < 4 )
                         {
-                                fputs("Not enough arguments.\nFormat for \"s\" option :\n\tmclipm s(ave) [file] [password] [comments (optional)]\n",stderr);
+                                fputs("Not enough arguments.\nFormat for \"s\" option :\n\tmclipm s <file> <password> [comments] ...\n",stderr);
                                 exit(NOT_ENOUGH_ARGS);
                         }
                         char * fname = argv[2];
@@ -247,7 +247,7 @@ int main(int argc, char **argv)
                         if(argc < 4)
                         {
                                 fprintf(stderr,
-                                "Not enough arguments.\nFormat for \"%s\" option :\n\tmclipm %s [file] [string]\n",
+                                "Not enough arguments.\nFormat for \"%s\" option :\n\tmclipm %s <file> <string> ...\n",
                                 deleting? "d" : "f", deleting? "d(elete)" : "f(ind)");
                                 exit(NOT_ENOUGH_ARGS);
                         }
@@ -352,7 +352,7 @@ int main(int argc, char **argv)
                 {
                         if(argc < 3)
                         {
-                                fputs("Not enough arguments.\nFormat for \"r\" option :\n\tmclipm r [file]\n",stderr);
+                                fputs("Not enough arguments.\nFormat for \"r\" option :\n\tmclipm r <file>\n",stderr);
                                 exit(NOT_ENOUGH_ARGS);
                         }
                         FILE * fp = fopen(argv[2],"r");
