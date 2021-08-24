@@ -1,6 +1,6 @@
 # MCLIP-M v2
 
-MCLIP-M, Minimalist Command Line Interface Password-Manager, is a simple utility written purely in standard C99/11.
+MCLIP-M, Minimalist Command Line Interface Password-Manager, is a simple utility written purely in standard C99.
 
 ## Features :
 1. Generates pseudo-random passwords consisting of printable, non-whitespace characters. Default lenght is 32 characters, although it can be easily customized by editing the macro.
