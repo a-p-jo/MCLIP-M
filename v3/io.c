@@ -46,7 +46,7 @@ struct opts getopts(char **argv)
 		if(arg && argv[arg] && *argv[arg]) {
 			char *err = strtosize_t(argv[arg],&input.pswd_len);
 			if(err) {
-				fprintf(stderr, "Bad lenght \"%s\" : %s\n", argv[l+1], err);
+				fprintf(stderr, "Bad lenght \"%s\" : %s\n", argv[arg], err);
 				exit(EXIT_FAILURE);
 			}
 			

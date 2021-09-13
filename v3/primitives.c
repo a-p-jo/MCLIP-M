@@ -204,7 +204,21 @@ char *getln(FILE *restrict fp, struct dystr *restrict buf)
 
 		int ch = getc(fp);
 
-		if(ch == EOF) {
+		switch(ch) {
+		case '\n' : case '\r' :
+		{
+			buf->str[i] = '\n';
+
+			if( !(i = CHKDADD(1,i)) )
+				goto error;
+			else {
+				buf->str[i] = '\0';
+				buf->len = i;
+				return buf->str;
+			}
+		}
+		case EOF :
+		{
 			if(feof(fp)) {
 				buf->str[i] = '\0';
 				buf->len = i;
@@ -216,17 +230,14 @@ char *getln(FILE *restrict fp, struct dystr *restrict buf)
 				return NULL;
 			}
 		}
-		
-		buf->str[i] = ch;
-		
-		if(ch == '\n') {
-			/* There's always space for '\0' */
-			buf->str[i+1] = '\0';
-			buf->len = i+1;
-			return buf->str;
+		default :
+		{
+			buf->str[i] = ch;
+			if( !(i = CHKDADD(1,i)) )
+				goto error;
+			else
+				break;
 		}
-
-		if( !(i = CHKDADD(1,i)) )
-			goto error;
+		}
 	}
 }
