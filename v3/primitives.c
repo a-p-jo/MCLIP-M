@@ -38,10 +38,8 @@ size_t chkd_size_t_mul(const size_t *vals)
 {
 	size_t prod;
 	for(prod = 1; *vals; vals++) {
-		size_t val = *vals;
-		size_t result = prod * val;
-		if(result/prod == val)
-			prod = result;
+		if(SIZE_MAX/prod >= *vals)
+			prod *= *vals;
 		else
 			return 0;
 
@@ -180,8 +178,7 @@ char *strtosize_t(const char *restrict str, size_t *restrict result)
 	if(*str == '-')
 		return "value < 1";
 
-	char *end = NULL; 
-	errno = 0;
+	char *end = NULL;
 	uintmax_t tmp = strtoumax(str,&end,10);
 	
 	if(errno == ERANGE || tmp > SIZE_MAX)
