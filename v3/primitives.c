@@ -1,240 +1,176 @@
+#ifdef _WIN32
+	#define WIN
+	#define _CRT_RAND_S /* Required before #include's for rand_s() */
+	#define _CRT_SECURE_NO_WARNINGS
+	#define _WIN32_WINNT _WIN32_WINNT_WINXP
+#elif defined __unix__ || (defined __APPLE__ && defined __MACH__)
+	#define NIX
+	#define NIX_RAND_DEV "/dev/urandom"
+#else
+	#define OTHER
+#endif
+
 #include "mclipm.h"
+#include <inttypes.h> /* uintmax_t, strtoumax      */
+#include <ctype.h>    /* tolower                   */
+#include <time.h>     /* time_t, time, ctime       */
 
-char *rm_newline(char *str, const size_t len)
+char *rm_newline(char *s, size_t len)
 {
-	if(len >= 2 && str[len-2] == '\r') 
-		str[len-2] = '\0';
-        else if(len >= 1 && (str[len-1] == '\n' || str[len-1] == '\r')) 
-		str[len-1] = '\0';
-
-	return str;
+	if(len >= 2 && s[len-2] == '\r') 
+		s[len-2] = '\0';
+        else if(len >= 1 && (s[len-1] == '\n' || s[len-1] == '\r')) 
+		s[len-1] = '\0';
+	return s;
 }
 
 char *time_str(void)
 {
-	time_t timenum  = time(0);
-	char *time_str  = ctime(&timenum);
-        
-        if(time_str)
-		return rm_newline(time_str,25);
-        else
-		return NULL;
+	char *s = ctime( &(time_t){time(NULL)} );
+	return s? rm_newline(s, 25) : NULL;
 }
 
-size_t chkd_size_t_add(const size_t *vals)
+size_t chkd_size_t_add(const size_t vals[])
 {
-	size_t sum;
-	for(sum = 0; *vals; vals++) {
-		size_t val = *vals;
-		if(SIZE_MAX - sum >= val)
-			sum += val;
+	size_t sum = 0;
+	for(size_t i = 0; vals[i] != 0; i++) {
+		if(SIZE_MAX-sum >= vals[i])
+			sum += vals[i];
 		else
-			return 0;
+			return OVRFLW;
 	}
 	return sum;
 }
 
-size_t chkd_size_t_mul(const size_t *vals)
+char *strcasestr(const char *str, const char *substr)
 {
-	size_t prod;
-	for(prod = 1; *vals; vals++) {
-		if(SIZE_MAX/prod >= *vals)
-			prod *= *vals;
-		else
-			return 0;
-
+	if(*substr == '\0') /* If substr empty, return str (special case) */
+		return (char *)str; /* cast away const */
+	for(; *str != '\0'; str++) {
+		if(tolower(*str) == tolower(*substr)) {
+			size_t i;
+			for(i = 1; str[i] != '\0' && substr[i] != '\0' 
+					&& tolower(str[i]) == tolower(substr[i]); i++);
+			if(substr[i] == '\0') /* All chars of substr matched */
+				return (char *)str;
+			else
+				str += i;
+		}
 	}
-	return prod;
+	return NULL;
 }
-
 
 char *csv_fmt(const char *raw)
 {
-        /* Determine strlen and number of quotes to be added */
-        size_t len, quotes;
-        for(len = 0, quotes = 0; raw[len]; len++) {
-                if(raw[len] == '"')
+        if(raw == NULL)
+		raw = "";
+
+	size_t len = 0, quotes = 0;
+	for(; raw[len] != '\0'; len++) {
+		if(raw[len] == '"')
 			quotes++;
-	}
-
-	/* Check for overflow  & malloc net size needed. */
-
-	/* Why in that order ?
-	 * CHKDADD(...) will stop evaluating at a 0 arg !
+	}	
+	/* CHKDADD(...) will stop evaluating at a 0 arg !
 	 * Thus, pass the constants first, as they must not be ignored.
 	 * Then, the len is likely to be non-0 even if quotes == 0. So pass it prior to the latter.
 	 */
-	size_t bytes = CHKDADD(1,2,len,quotes);
-	if(!bytes)
+	size_t sz = CHKDADD(1, 2, len, quotes); /* 1 for '\0', 2 for "" */
+	if(sz == OVRFLW)
 		return NULL;
-
-	char *rval = malloc(bytes);
-
-	if(rval) {
-		/* 1. Add quotes to beginning & end. 
-         	 * 2. Escape every double quote in raw str with another.
-		 * 3. Copy all other chars as-is. Terminate with '\0'.
+	char *res = malloc(sz);
+	if(res) {
+		/* 1. Add quotes to begining & end. 
+         	 * 2. Escape every '"' with another.
+		 * 3. Copy other chars as-is. Terminate with '\0'.
          	 */
-		rval[0] = '"';
-		size_t q = 1;
-		for(size_t i = 0; raw[i]; rval[q++] = raw[i++]) {
+		size_t j = 0;
+		res[j++] = '"';
+		for(size_t i = 0; raw[i] != '\0'; res[j++] = raw[i++]) {
 			if(raw[i] == '"')
-				rval[q++] = '"';
+				res[j++] = '"';
 		}
-		rval[q] = '"'; 
-		rval[q+1] = '\0';
-		return rval;
-	} else
-		return NULL;
-}
-
-static char *dystr_mgr(struct dystr *dystr) 
-{
-	/* If str is NULL (uninitialized) allocate to initial size + 1 (for '\0').
-	 * Thereafter, realloc by multiple of growth factor (the extra 1 byte stays). 
-	 * Check for overflows.
-	 */
-	size_t newsz;
-	if(dystr->str) {
-		if( !( newsz = CHKDMUL(DYSTR_GROWBY,dystr->sz) ) || !( newsz = CHKDADD(1,newsz) ) ) 
-		error :
-		{ 
-				free(dystr->str);
-				return NULL;
-		}
-	} else
-		newsz = DYSTR_INITSZ + 1;
-
-	void *tmp = realloc(dystr->str,newsz);
-	if(tmp) {
-		dystr->str = tmp;
-		dystr->sz  = newsz;
-		return dystr->str;
-	} else
-		goto error;
-}
-
-char *strlower(struct dystr *restrict dest, const char *restrict src)
-{
-	size_t i;
-	for(i = 0; src[i]; i++) {
-		if(i == dest->sz && !dystr_mgr(dest))
-			return NULL;
-		dest->str[i] = tolower(src[i]);
+		res[j] = '"';
+		res[j+1] = '\0';
 	}
-	dest->str[i] = '\0';
-	dest->len    = i;
-	return dest->str;
+	return res;
 }
 
-
-char *mkpswd(const size_t len,const char upper_lim,const char lower_lim)
+char *mkpwd(size_t len, char upper_lim, char lower_lim)
 {
-	size_t bytes = CHKDADD(1,len);
-	if(!bytes)
+	char *pswd;
+	if(SIZE_MAX-1 < len || (pswd = malloc(len+1)) == NULL)
 		return NULL;
-
-	char *pswd = malloc(bytes);	
-	if(!pswd) 
-		return NULL;
-
-	#if defined NIX
-		FILE *randf = fopen(NIX_RAND_DEV,"rb");
-		if(!randf)
+	#ifdef NIX
+		FILE *randf = fopen(NIX_RAND_DEV, "rb");
+		if(randf == NULL) {
+			free(pswd);
 			return NULL;
+		}
 	#elif defined OTHER
-		srand(time(0));
+		srand(time(NULL));
 	#endif		
 	
-	for(size_t i = 0; i < len; i++) {
+	for(pswd[len] = '\0'; len --> 0;) {
 		#if defined WIN
 			unsigned random;
-			/* "errno_t rand_s(unsigned int *)" - Microsoft docs */
 			errno_t error = rand_s(&random);
-			if(error)
+			if(error) {
+				free(pswd);
 				return NULL;
+			}
 		#elif defined NIX
 			int random = fgetc(randf);
-			if(random == EOF)
+			if(random == EOF) {
+				free(pswd);
 				return NULL;
+			}	
 		#else
 			int random = rand();
 		#endif
-
-		/* Force random number into range */
-		pswd[i] = (random % (upper_lim - lower_lim + 1)) + lower_lim;
-			
+		pswd[len] = (random % (upper_lim - lower_lim + 1)) + lower_lim;
 	}
-	pswd[len] = '\0';
 	#ifdef NIX
 		fclose(randf);
 	#endif
 	return pswd;
 }
 
-char *strtosize_t(const char *restrict str, size_t *restrict result)
+bool strtosize_t(size_t *dst, const char *restrict src)
 {
-	/* wraparound in strtoumax, explicit check needed */
-	if(*str == '-')
-		return "value < 1";
+	if(*src == '-' || strempty(src))
+		return false;
 
 	char *end = NULL;
-	uintmax_t tmp = strtoumax(str,&end,10);
+	uintmax_t tmp = strtoumax(src, &end, 10);
 	
-	if(errno == ERANGE || tmp > SIZE_MAX)
-		return "value too big";
-	else if(*end)
-		return "non-digits invalid";
-	else if(!tmp)
-		return "value  < 1";
+	if(errno == ERANGE || tmp > SIZE_MAX || !strempty(end) || tmp == 0)
+		return false;
 	else {
-		*result = tmp;
-		return NULL;
+		*dst = tmp;
+		return true;
 	}
 }
 
-char *getln(FILE *restrict fp, struct dystr *restrict buf)
+MGA_DEF(dystr)
+static inline bool dystr_push(struct dystr *dst, char ch) 
 {
-	for(size_t i = 0;;) {
-		if(i == buf->sz && !dystr_mgr(buf))
+	return dystr_insert(dst, dst->len, &ch, 1);
+}
+
+char *getln(struct dystr *dst, FILE *src)
+{
+	for(int ch; (ch = getc(src)) != EOF;) {
+		if(!dystr_push(dst, ch)) 
+		err : 
+		{
+			dystr_destroy(dst);
 			return NULL;
-
-		int ch = getc(fp);
-
-		switch(ch) {
-		case '\n' : case '\r' :
-		{
-			buf->str[i] = '\n';
-
-			if( !(i = CHKDADD(1,i)) )
-				goto error;
-			else {
-				buf->str[i] = '\0';
-				buf->len = i;
-				return buf->str;
-			}
 		}
-		case EOF :
-		{
-			if(feof(fp)) {
-				buf->str[i] = '\0';
-				buf->len = i;
-				return buf->str;
-			} else 
-			error :
-			{
-				free(buf->str);
-				return NULL;
-			}
-		}
-		default :
-		{
-			buf->str[i] = ch;
-			if( !(i = CHKDADD(1,i)) )
-				goto error;
-			else
-				break;
-		}
-		}
+		if(ch == '\n')
+			break;
 	}
+	if(dystr_push(dst, '\0'))
+		return dst->arr;
+	else
+		goto err;
 }
