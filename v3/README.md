@@ -1,4 +1,4 @@
-# MCLIP-M v3.11
+# MCLIP-M v3.2
 
  Minimalist Command Line Interface Password-Manager is a simple utility written purely in standard C99.
 
@@ -13,12 +13,12 @@
 1. [Download](https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2Fa-p-jo%2FMCLIP-M%2Ftree%2Fmain%2Fv3) the v3 directory and unzip it.
 2. Compile all `.c` files in the directory.  For example, on Linux/macOS do :
 ```sh
-$ gcc v3/primitives.c v3/io.c v3/main.c -O3 -flto -o mclipm
+$ cc v3/* -Ofast -flto -o mclipm
 ```
 3. Run the executable with no options to see the help menu :
 ```
 $ ./mclipm
-MCLIPM v3 : Minimalist Command-Line Password Manager.
+MCLIPM v3.2 : Minimalist CLI Password Manager.
 See https://github.com/a-p-jo/mclipm for git repo.
 
 4 main commands : "g"(generate), "s"(save), "f"(find), "d"(delete)
@@ -26,44 +26,42 @@ See https://github.com/a-p-jo/mclipm for git repo.
 1. "g" :
    Generates a random password.
    Example : mclipm g
-          -> Generates and output a password containing 32 non-whitespace printable ASCII chars.
-   Format  : mclipm g [options (optional)] [option's argument (optional)]...
+          -> Displays a random 32-char (no spaces) password.
+   Format  : mclipm g [option] <option's argument>...
 
-   Optionally, "g" takes any of 3 options, in any order :
+   "g" may be given any combination of 3 options, in any order :
 
-   1.1 "-l" : Specify the number of characters in the password.
+   1.1 "-l" : Specify length of password.
    Example  : mclipm g -l 16
-           -> Outputs a 16-char password.
-   Format   : mclipm g -l <any natural number less than 2^64 - 2>...
-   1.2 "-o" : Save password, optional comments and automatic timestamp as CSV entry to a file.
-   Example  : mclipm g -l 16 -o foo.csv "This is a comment"
+           -> Resulting password is 16 chars long.
+   Format   : mclipm g -l <n, {0 < n < SIZE_MAX-1}>...
+   1.2 "-o" : Specify outfile and (optionally) comments.
+   Example  : mclipm g -l 16 -o foo.csv "xyz.com, uname abc"
            -> Nothing is displayed except in case of errors.
-           -> Appends the 16-char password to "foo.csv", like so :
-              "Thu Jun 09 18:00:12 2016","a79&8*kjn!ok)$31","This is a comment"
+           -> Appends CSV-formatted output to a new line in "foo.csv" :
+              "Thu Jun 09 18:00:12 2016","a79&8*kjn!ok)$31","xyz.com, uname abc"
    Format   : mclipm g -o [filename (optional, default: "mclipm.csv")] [comments (optional, default: "")]...
    1.3 "-r" : Specify range of password's  ASCII characters.
-              By default, the range is "!~", i.e. for any char, '~' >= char >= '!'.
-              This allows any non-whitespace printable (English) chars. You may consult a chart.
+              By default, the range is "!~", i.e. '~' >= char >= '!'.
+              This allows all non-whitespace printable ASCII chars.
    Example  : mclipm g -r " "
-           -> The lower limit char is now ' '(space); password may include spaces.
+           -> The lower limit is now ' '(space); password may include spaces.
    Format   : mclipm g -r "<lower_limit>[upper_limit(optional, default '~')]"
 
 2. "s" :
-   Save a password with optional comments, automatic timestamp & encoded as CSV
-   Example : mclipm s 12345
+   Save a password with optional comments, automatic timestamp; formatted as CSV
+   Examples: mclipm s 12345
           -> Saves the password "12345" with empty ("") comments to mclipm.csv
-             mclip s 1234 "strong & complicated password" "donread.csv"
-          -> Saves the same password but with "strong..." comment and to "donread.csv"
-   Format  : mclipm s <password> [comments (optional)] [filename (optional, mclipm.csv default)]
+   Format  : mclipm s <password> [comments] [filename (optional, default: "mclipm.csv")]
 
 3. "f" :
-   Searches for an entry case-insensitively with sub-string matching, and displays it.
-   Example : mclipm f "" "foo@gmail.com"
-          -> Searches for entry with instance of foo@gmail.com in default (mclipm.csv) file.
-          -> Multiple search terms, say like "mclipm f x.csv gmail arch", also possible.
-   Format  : mclipm f <filename (if empty, saves to mclipm.csv)> <search term> [search term]...
+   Find any entries in given file which matches given search terms.
+   Example : mclipm f "" "x.com"
+          -> Searches for entry with instance of "x.com" in default (mclipm.csv) file.
+          -> Multiple terms, like "foo", "BAR" in "mclipm f x.csv foo BAR", also possible.
+   Format  : mclipm f <filename (if empty, saves to mclipm.csv)> <search term>...
 
-4. "d" : Same as "f"; except it deletes an entry with a match.
+4. "d" : Same as "f"; except it deletes any entries with a match.
 ```
 **Note :** 
 
