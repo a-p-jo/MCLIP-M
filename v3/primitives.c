@@ -19,15 +19,15 @@ char *rm_newline(char *s, size_t len)
 {
 	if(len >= 2 && s[len-2] == '\r') 
 		s[len-2] = '\0';
-        else if(len >= 1 && (s[len-1] == '\n' || s[len-1] == '\r')) 
+        else if(len >= 1 && (s[len-1] == '\n' || s[len-1] == '\r'))
 		s[len-1] = '\0';
 	return s;
 }
 
-char *time_str(void)
+const char *time_str(void)
 {
 	char *s = ctime( &(time_t){time(NULL)} );
-	return s? rm_newline(s, 25) : NULL;
+	return s? rm_newline(s, 25) : "";
 }
 
 size_t chkd_size_t_add(const size_t vals[])
@@ -42,29 +42,27 @@ size_t chkd_size_t_add(const size_t vals[])
 	return sum;
 }
 
-char *strcasestr(const char *str, const char *substr)
+bool iscasesubstr(const char *restrict s, const char *restrict sub)
 {
-	if(*substr == '\0') /* If substr empty, return str (special case) */
-		return (char *)str; /* cast away const */
-	for(; *str != '\0'; str++) {
-		if(tolower(*str) == tolower(*substr)) {
+	if(*sub == '\0')
+		return true;
+	for(; *s != '\0'; s++) {
+		if(tolower(*s) == tolower(*sub)) {
 			size_t i;
-			for(i = 1; str[i] != '\0' && substr[i] != '\0' 
-					&& tolower(str[i]) == tolower(substr[i]); i++);
-			if(substr[i] == '\0') /* All chars of substr matched */
-				return (char *)str;
+			for(i = 1; s[i] != '\0' && sub[i] != '\0'
+					&& tolower(s[i]) == tolower(sub[i]); i++)
+				;
+			if(sub[i] == '\0')
+				return true;
 			else
-				str += i;
+				s += i;
 		}
 	}
-	return NULL;
+	return false;
 }
 
 char *csv_fmt(const char *raw)
 {
-        if(raw == NULL)
-		raw = "";
-
 	size_t len = 0, quotes = 0;
 	for(; raw[len] != '\0'; len++) {
 		if(raw[len] == '"')
@@ -89,50 +87,49 @@ char *csv_fmt(const char *raw)
 			if(raw[i] == '"')
 				res[j++] = '"';
 		}
-		res[j] = '"';
-		res[j+1] = '\0';
+		res[j++] = '"', res[j] = '\0';
 	}
 	return res;
 }
 
 char *mkpwd(size_t len, char upper_lim, char lower_lim)
 {
-	char *pswd;
-	if(SIZE_MAX-1 < len || (pswd = malloc(len+1)) == NULL)
+	char *pwd;
+	if(SIZE_MAX-1 < len || (pwd = malloc(len+1)) == NULL)
 		return NULL;
 	#ifdef NIX
 		FILE *randf = fopen(NIX_RAND_DEV, "rb");
 		if(randf == NULL) {
-			free(pswd);
+			free(pwd);
 			return NULL;
 		}
 	#elif defined OTHER
 		srand(time(NULL));
 	#endif		
 	
-	for(pswd[len] = '\0'; len --> 0;) {
+	for(pwd[len] = '\0'; len --> 0;) {
 		#if defined WIN
 			unsigned random;
 			errno_t error = rand_s(&random);
 			if(error) {
-				free(pswd);
+				free(pwd);
 				return NULL;
 			}
 		#elif defined NIX
 			int random = fgetc(randf);
 			if(random == EOF) {
-				free(pswd);
+				free(pwd);
 				return NULL;
 			}	
 		#else
 			int random = rand();
 		#endif
-		pswd[len] = (random % (upper_lim - lower_lim + 1)) + lower_lim;
+		pwd[len] = (random % (upper_lim - lower_lim + 1)) + lower_lim;
 	}
 	#ifdef NIX
 		fclose(randf);
 	#endif
-	return pswd;
+	return pwd;
 }
 
 bool strtosize_t(size_t *dst, const char *restrict src)
@@ -152,25 +149,25 @@ bool strtosize_t(size_t *dst, const char *restrict src)
 }
 
 MGA_DEF(dystr)
-static inline bool dystr_push(struct dystr *dst, char ch) 
-{
-	return dystr_insert(dst, dst->len, &ch, 1);
-}
 
-char *getln(struct dystr *dst, FILE *src)
+enum {LNSZ = 256}; /* Growth factor for getln() */
+/* Reads line from src to dst->arr (retains EOL),
+ * sets dst->len to the '\0' byte.
+ *
+ * Returns false & dst->len = 0 on alloc error,
+ * ferror(src) or feof(src), leaving
+ * dst->arr indeterminate.
+ */
+bool getln(struct dystr *dst, FILE *src)
 {
-	for(int ch; (ch = getc(src)) != EOF;) {
-		if(!dystr_push(dst, ch)) 
-		err : 
-		{
-			dystr_destroy(dst);
-			return NULL;
-		}
-		if(ch == '\n')
-			break;
-	}
-	if(dystr_push(dst, '\0'))
-		return dst->arr;
-	else
-		goto err;
+	dst->len = 0;
+	do {
+		/* Check feof() first to avoid unnecessary allocation */
+		if(feof(src) || !dystr_reserve(dst, dst->len+LNSZ+1)
+				|| fgets(dst->arr+dst->len, dst->cap-dst->len, src) == NULL) {
+			return false;
+		} else
+			dst->len += strlen(dst->arr + dst->len);
+	} while(dst->arr[dst->len-1] != '\n');
+	return true;
 }

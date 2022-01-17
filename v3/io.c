@@ -1,6 +1,6 @@
 #include "mclipm.h"
 
-struct opts getopts(char **argv)
+struct opts getopts(const char *const *argv)
 {
 	/* Intitialize to defaults */
 	struct opts opts = {
@@ -62,7 +62,7 @@ struct opts getopts(char **argv)
 	return opts;
 }
 
-void mkentry(FILE *dst, const char *restrict pswd, const char *restrict comments)
+void mkentry(FILE *restrict dst, const char *restrict pswd, const char *restrict comments)
 {
 	char *tm = csv_fmt(time_str()), *pwd = csv_fmt(pswd), *cmnt = csv_fmt(comments);
 
@@ -84,7 +84,7 @@ void mkentry(FILE *dst, const char *restrict pswd, const char *restrict comments
 	}
 }
 
-void find_del(const char *restrict fname, bool deleting, char **terms)
+void find_del(const char *restrict fname, bool deleting, const char *const *terms)
 {                      
 	FILE *f = fopen(fname, "r");
 	if(f == NULL)
@@ -100,29 +100,30 @@ void find_del(const char *restrict fname, bool deleting, char **terms)
 			ERROR_EXIT("Couldn't open temporary file to write changes");
 	}
 
-	struct dystr buf = dystr_create(DYSTR_INITCAP); 
+	struct dystr buf = {0};
 	uintmax_t matches = 0;
 	for(uintmax_t line = 1 ;; line++) {
-		if(getln(&buf, f) == NULL) {
-			if(deleting) {
-				fclose(tmp); 
-				remove(TMPF);
+		if(!getln(&buf, f)) {
+			if(feof(f))
+				break;
+			else {
+				if(deleting) {
+					fclose(tmp); 
+					remove(TMPF);
+				}
+				ERROR_EXIT("Couldn't allocate line buffer");
 			}
-			ERROR_EXIT("Couldn't allocate line buffer");
-		} 
-
-		if(strempty(buf.arr)) /* EOF */
-			break;
-
+		}
+		
 		bool found = false;
 		for(int i = 0; terms[i] != NULL; i++) {
-			if(strcasestr(buf.arr, terms[i])) {
+			if(iscasesubstr(buf.arr, terms[i])) {
 				found = true;
 				break;
 			}
 		}
 		if(found) {
-			printf("%ju : %s\n", line, rm_newline(buf.arr, buf.len-1));
+			printf("%ju : %s\n", line, rm_newline(buf.arr, buf.len));
 			matches++;
 		} else if(deleting && fputs(buf.arr, tmp) == EOF) {
 			fclose(tmp);

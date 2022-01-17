@@ -19,7 +19,6 @@ enum {
 	DEFAULT_PWD_LEN     = 32 ,
 	DEFAULT_RANGE_UPPER = '~',
 	DEFAULT_RANGE_LOWER = '!', /* No whitespace by default */
-	DYSTR_INITCAP       = 100  /* Initial char capacity of dystr buffers */
 };
 
 #define ERROR_EXIT(msg) do { \
@@ -34,14 +33,14 @@ static bool strempty(const char *s) { return *s == '\0'; }
 char *rm_newline(char *s, size_t len);
 
 /* Returns ctime() string, stripped of '\n' */
-char *time_str(void);
+const char *time_str(void);
 
 /* Returns 0 if sum overflows, else sum of vals */
 enum {OVRFLW};
 size_t chkd_size_t_add(const size_t vals[]);
 #define CHKDADD(...) chkd_size_t_add((const size_t []) {__VA_ARGS__,0})
 
-char *strcasestr(const char *str, const char *substr);
+bool iscasesubstr(const char *restrict s, const char *restrict sub);
 
 /* Returns malloc'd csv-formatted copy of raw or NULL */ 
 char *csv_fmt(const char *raw);
@@ -56,14 +55,18 @@ bool strtosize_t(size_t *dst, const char *restrict src);
 
 MGA_DECL(dystr, char)
 
-/* Returns line from src copied to alloced dst->arr. 
- * If error, dystr_destroy()s dst & returns NULL.
+/* Reads line from src to dst->arr (retains EOL),
+ * sets dst->len to the '\0' byte.
+ *
+ * Returns false & dst->len = 0 on alloc error,
+ * ferror(src) or feof(src), leaving
+ * dst->arr indeterminate.
  */
-char *getln(struct dystr *dst, FILE *src);
+bool getln(struct dystr *dst, FILE *src);
 
 struct opts {
 	size_t pwdlen;
-	char *restrict outfile, *restrict comments;
+	const char *restrict outfile, *restrict comments;
 	struct {
 		char upper;
 		char lower; 
@@ -74,12 +77,12 @@ struct opts {
  * evaluate if any and return struct opts with corresponding values.
  * Bad options result in error messages and termination.
  */
-struct opts getopts(char **argv);
+struct opts getopts(const char *const *argv);
 
 /* Call csv_fmt on pswd & comments and write them comma-seperated to dst */
-void mkentry(FILE *dst, const char *restrict pswd, const char *restrict comments);
+void mkentry(FILE *restrict dst, const char *restrict pswd, const char *restrict comments);
 
 /* Case-insensitively strstr's given terms for 1st match in lines of file.
  * Prints line with a match. If deleting, deletes line with a match. 
  */
-void find_del(const char *restrict fname, bool deleting, char **terms);
+void find_del(const char *restrict fname, bool deleting, const char *const *terms);
