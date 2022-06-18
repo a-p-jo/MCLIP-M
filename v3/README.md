@@ -1,24 +1,24 @@
-# MCLIP-M v3.3
+# MCLIP-M v3.4
 
- Minimalist Command Line Interface Password-Manager is a simple utility written purely in standard C99.
+ Minimalist Command Line Interface Password-Manager is a simple utility written in standard C99.
 
 ## Features :
 1. Generates cryptographic-strength* random passwords of customizable length & character range.
-2. Saves generated or other passwords with an automatic timestamp and optional comments as a CSV formatted entry to file. This makes it highly compatible across text editors, database managers,spreadsheet tools, and a whole host of advanced software should you wish to use it with them.
-3. Find or delete entries in a file with case-insensitive search. 
+2. Saves generated or other passwords with an automatic timestamp and optional comments as a CSV formatted entry to file. This makes it highly compatible across text editors, database managers, spreadsheet tools, and a whole host of advanced software should you wish to use it with them.
+3. Find or delete entries in a file with case-insensitive substring search. 
 
-*\*On POSIX-compliant operating systems or Windows XP and above only.*
+*\*On POSIX systems or Windows XP and above only.*
 
 ## How to use :
 1. [Download](https://download-directory.github.io/?url=https%3A%2F%2Fgithub.com%2Fa-p-jo%2FMCLIP-M%2Ftree%2Fmain%2Fv3) the v3 directory and unzip it.
 2. Compile all `.c` files in the directory.  For example, on Linux/macOS do :
 ```sh
-$ cc v3/* -Ofast -flto -o mclipm
+$ cc v3/*.c -Ofast -flto -o mclipm
 ```
-3. Run the executable with no options to see the help menu :
+3. Run the executable to see the help menu :
 ```
-$ ./mclipm
-MCLIPM v3.2 : Minimalist CLI Password Manager.
+$ ./mclipm -h
+MCLIPM v3.4 : Minimalist CLI Password Manager.
 See https://github.com/a-p-jo/mclipm for git repo.
 
 4 main commands : "g"(generate), "s"(save), "f"(find), "d"(delete)
@@ -65,7 +65,7 @@ See https://github.com/a-p-jo/mclipm for git repo.
 ```
 **Note :** 
 
-Keeping passwords as plaintext is ill-advised. It is suggested that you  encrypt the file when not in use using your favorite
+Keeping passwords as plaintext is ill-advised. It is suggested that you  encrypt the file when not in use using your preffered
 encryption tools for your OS/platform. 
 
 For instance, you could use [XOTP](https://github.com/a-p-jo/xotp) with :

@@ -2,9 +2,9 @@
 
 int main(int argc, const char *const *argv)
 {              
-        if(argc < 2 || streq("-h",argv[1])) {
-                fputs(
-		NAME " : Minimalist CLI Password Manager.\n"
+        if (argc < 2 || streq("-h",argv[1])) {
+                fprintf( argc < 2 ? stderr : stdout,
+		"%s v"MCLIPM_VERSION" : Minimalist CLI Password Manager.\n"
 		"See https://github.com/a-p-jo/mclipm for git repo.\n"
 		"\n"
 		"4 main commands : \"g\"(generate), \"s\"(save), \"f\"(find), \"d\"(delete)\n"
@@ -12,7 +12,7 @@ int main(int argc, const char *const *argv)
 		"1. \"g\" :\n"
 		"   Generates a random password.\n"
 		"   Example : mclipm g\n"
-		"          -> Displays a random 32-char (no spaces) password.\n"
+		"          -> Displays a random %d-char (no spaces) password.\n"
 		"   Format  : mclipm g [option] <option's argument>...\n"
 		"\n"
                 "   \"g\" may be given any combination of 3 options, in any order :\n"
@@ -47,18 +47,18 @@ int main(int argc, const char *const *argv)
 		"          -> Multiple terms, like \"foo\", \"BAR\" in \"mclipm f x.csv foo BAR\", also possible.\n"
 		"   Format  : mclipm f <filename (if empty, saves to mclipm.csv)> <search term>...\n"
 		"\n"
-		"4. \"d\" : Same as \"f\"; except it deletes any entries with a match.\n"
-		,argc < 2? stderr : stdout);
+		"4. \"d\" : Same as \"f\"; except it deletes any entries with a match.\n",
+		argv[0], DEFAULT_PWD_LEN);
                 exit(argc < 2 ? EXIT_FAILURE : EXIT_SUCCESS);
         }
 
-	if(streq("g", argv[1])) {
+	if (streq("g", argv[1])) {
 		struct opts opts = getopts(argv);
-		char *pwd = mkpwd(opts.pwdlen, opts.range.upper, opts.range.lower);
-		if(pwd != NULL) {
-			if(opts.outfile) {
+		char *pwd = mkpwd(opts.pwdlen, opts.chrange.min, opts.chrange.max);
+		if (pwd) {
+			if (opts.outfile) {
 				FILE *f = fopen(opts.outfile, "a");
-				if(f != NULL) 
+				if (f) 
 					mkentry(f, pwd, opts.comments);
 				else {
 					free(pwd);
@@ -69,27 +69,26 @@ int main(int argc, const char *const *argv)
 			free(pwd);
 		} else 
 			ERROR_EXIT("Couldn't generate password");
-        } else if(streq("s", argv[1])) {
-		if(argc >= 3) {
+
+        } else if (streq("s", argv[1])) {
+		if (argc >= 3) {
 			const char *pwd = argv[2], *comments, *fname;
-			if(argc >= 4) {
-				comments = argv[3];
-				fname = argc >= 5? argv[4] : DEFAULT_PFILE;
-			} else {
-				comments = "";
-				fname = DEFAULT_PFILE;
-			}
+			if (argc >= 4)
+				comments = argv[3], fname = argc >= 5? argv[4] : DEFAULT_PWD_FILE_NAME;
+			else
+				comments = "", fname = DEFAULT_PWD_FILE_NAME;
 
 			FILE *f = fopen(fname, "a");
-			if(f)
+			if (f)
 				mkentry(f, pwd, comments);
 			else
 				ERROR_EXIT("Couldn't open file");
 		} else
-			ERROR_EXIT("Not enough arguments.\nFor help : mclipm -h\n"); 
-	} else if(streq("f", argv[1]) || streq("d", argv[1])) {
-		if(argc >= 4)
-			find_del(*argv[2]? argv[2] : DEFAULT_PFILE, streq("d", argv[1]), argv+3);
+			ERROR_EXIT("Not enough arguments.\nFor help : mclipm -h\n");
+
+	} else if (streq("f", argv[1]) || streq("d", argv[1])) {
+		if (argc >= 4)
+			find_del(strempty(argv[2])? DEFAULT_PWD_FILE_NAME : argv[2], streq("d", argv[1]), argv+3);
 		else
 			ERROR_EXIT("Not enough arguments.\nFor help : mclipm -h\n");
 	} else
