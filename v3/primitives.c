@@ -116,27 +116,24 @@ bool strtosize_t(size_t *dst, const char *restrict src)
 	}
 }
 
-SBOMGA_DEF(extern, dystr)
+SBOMGA_DEF(extern, dystr, realloc, free)
 
 /* Reads line from src to dst->arr (retains EOL),
  * sets dst->len to the '\0' byte.
  *
- * Returns false & dst->len = 0 on alloc error,
+ * Returns false on alloc error,
  * ferror(src) or feof(src), leaving
  * dst->arr indeterminate.
  */
 bool getln(dystr *dst, FILE *src)
 {
-	dst->len = 0;
 	do {
 		/* Check feof() first to avoid unnecessary allocation */
-		if (
-			feof(src) || !dystr_reserve(dst, dst->len+GETLN_LNSZ+1)
-			|| !fgets(dystr_arr(dst) + dst->len, dystr_cap(dst) - dst->len, src)
-		)
+		if (!dystr_reserve(dst, dst->len+1+1)
+		|| !fgets(dystr_arr(dst)+dst->len, dystr_cap(dst)-dst->len, src))
 			return false;
 		else
-			dst->len += strlen(dystr_arr(dst) + dst->len);
-	} while (dystr_arr(dst)[dst->len-1] != '\n');
+			dst->len += strlen(dystr_arr(dst)+dst->len);
+	} while (dystr_arr(dst)[dst->len-1] != '\n' && !feof(src));
 	return true;
 }

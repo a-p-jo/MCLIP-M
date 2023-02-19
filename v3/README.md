@@ -18,7 +18,7 @@ $ cc v3/*.c -Ofast -flto -o mclipm
 3. Run the executable to see the help menu :
 ```
 $ ./mclipm -h
-MCLIPM v3.4 : Minimalist CLI Password Manager.
+MCLIPM v3.5 : Minimalist CLI Password Manager.
 See https://github.com/a-p-jo/mclipm for git repo.
 
 4 main commands : "g"(generate), "s"(save), "f"(find), "d"(delete)

@@ -9,7 +9,7 @@
 			EXIT_FAILURE, EXIT_SUCCESS      */
 #include "sbomga.h"
 
-#define MCLIPM_VERSION               "3.4"
+#define MCLIPM_VERSION               "3.5"
 #define DEFAULT_TEMPORARY_FILE_NAME  ".mclipm.tmp"
 #define DEFAULT_PWD_FILE_NAME        "mclipm.csv"
 #define DEFAULT_PWD_LEN              16
@@ -69,9 +69,7 @@ char *mkpwd(size_t len, char minch, char maxch);
 /* Converts src to a size_t value and stores at *dst on success. */
 bool strtosize_t(size_t *dst, const char *restrict src);
 
-enum { GETLN_LNSZ = 128 };
-
-SBOMGA_DECL(extern, dystr, realloc, free, GETLN_LNSZ, char)
+SBOMGA_DECL(extern, dystr, 0, char)
 
 /* Reads line from src to dst->arr (retains EOL),
  * sets dst->len to the '\0' byte.

@@ -94,7 +94,7 @@ void find_del(const char *restrict fname, bool deleting, const char *const restr
 
 	dystr buf = {0};
 	uintmax_t matches = 0;
-	for(uintmax_t line = 1 ;; line++) {
+	for(uintmax_t line = 1 ;; buf.len = 0, line++) {
 		if (!getln(&buf, f)) {
 			if (feof(f))
 				break;
