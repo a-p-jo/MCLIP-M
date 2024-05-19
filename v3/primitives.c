@@ -107,8 +107,10 @@ bool strtosize_t(size_t *dst, const char *restrict src)
 	if(*src == '-' || strempty(src))
 		return false;
 	char *end = NULL;
+	int olderrno = errno; errno = 0;
 	uintmax_t tmp = strtoumax(src, &end, 10);
-	if(errno == ERANGE || tmp > SIZE_MAX || !strempty(end) || tmp == 0)
+	int newerrno = errno; errno = olderrno;
+	if(newerrno == ERANGE || tmp > SIZE_MAX || !strempty(end) || tmp == 0)
 		return false;
 	else {
 		*dst = tmp;

@@ -1,4 +1,4 @@
-# MCLIP-M v3.5
+# MCLIP-M v3.6
 
  Minimalist Command Line Interface Password-Manager is a simple utility written in standard C99.
 
